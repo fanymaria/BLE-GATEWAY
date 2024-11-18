@@ -10,18 +10,20 @@ const NavbarAfter = () => {
       <div style={styles.navLinks}>
         <div style={styles.navLinksnav}>
           <Link to="/home" href="app.jsx" style={styles.link}>Home</Link>
-          <Link to="/di isi halaman About baru setelah login" href="app.jsx" style={styles.link}>About</Link>
-          <Link to="/halaman Itinerary setelah login" href="app.jsx" style={styles.link}>Itinerary</Link>
+          <Link to="/aboutafterlog" href="app.jsx" style={styles.link}>About</Link>
+          <Link to="/itineraryafterlog" href="app.jsx" style={styles.link}>Itinerary</Link>
           <Link to="/halaman Contact setelah login" href="app.jsx" style={styles.link}>Contact</Link>
         </div>
       </div>
       <div style={styles.buttonContainer}>
+      {/* Tambahkan navigasi ke halaman profil */}
+      <Link to="/profile">
         <img src="/path/to/your/profile.jpg" alt="Profile" style={styles.profileImage} />
+      </Link>
       </div>
-    </nav>
+      </nav>
   );
 };
-
 const styles = {
   navbar: {
     display: 'flex',

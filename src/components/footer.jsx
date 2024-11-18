@@ -5,6 +5,7 @@ function Footer() {
     footer: {
       backgroundColor: "#0F67B1",
       color: "#fff",
+      width: "100%",
       padding: "30px",
       display: "flex",
       justifyContent: "space-around",
