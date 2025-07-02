@@ -5,64 +5,55 @@ const DataTable = () => {
   const [messageType, setMessageType] = useState('All Message Type')
   const [startDate, setStartDate] = useState('23/04/2025')
   const [endDate, setEndDate] = useState('23/04/2025')
-  const [currentPage, setCurrentPage] = useState(4)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
-  const tableData = [
-    {
-      no: 1,
-      message_type: 'Heartbeat',
-      state: '33800000',
-      battery_voltage: '21.8',
-      battery_level: '100',
-      ble_rx_count: '1234',
-      param_16: '-',
-      param_242: '-'
-    },
-    {
-      no: 2,
-      message_type: 'Parameter Report',
-      state: '33800000',
-      battery_voltage: '21.9',
-      battery_level: '98',
-      ble_rx_count: '2345',
-      param_16: '69840',
-      param_242: '-'
-    },
-    {
-      no: 3,
-      message_type: 'Registration',
-      state: '33800001',
-      battery_voltage: '22.0',
-      battery_level: '95',
-      ble_rx_count: '4523',
-      param_16: '-',
-      param_242: '-'
-    },
-    {
-      no: 4,
-      message_type: 'Heartbeat',
-      state: '33800000',
-      battery_voltage: '21.9',
-      battery_level: '100',
-      ble_rx_count: '5678',
-      param_16: '-',
-      param_242: '-'
-    },
-    {
-      no: 5,
-      message_type: 'Registration',
-      state: '33800001',
-      battery_voltage: '22.0',
-      battery_level: '100',
-      ble_rx_count: '4567',
-      param_16: '-',
-      param_242: '-'
+  // Generate 50 sample data entries
+  const generateTableData = () => {
+    const messageTypes = ['Heartbeat', 'Parameter Report', 'Registration']
+    const states = ['33800000', '33800001', '33800002', '33800003']
+    const data = []
+
+    for (let i = 1; i <= 50; i++) {
+      const messageTypeRandom = messageTypes[Math.floor(Math.random() * messageTypes.length)]
+      const stateRandom = states[Math.floor(Math.random() * states.length)]
+      const batteryVoltage = (21.5 + Math.random() * 1.0).toFixed(1)
+      const batteryLevel = Math.floor(85 + Math.random() * 15)
+      const bleRxCount = Math.floor(1000 + Math.random() * 9000)
+      const param16 = messageTypeRandom === 'Parameter Report' ? Math.floor(50000 + Math.random() * 50000) : '-'
+      const param242 = Math.random() > 0.8 ? Math.floor(100 + Math.random() * 900) : '-'
+
+      data.push({
+        no: i,
+        message_type: messageTypeRandom,
+        state: stateRandom,
+        battery_voltage: batteryVoltage,
+        battery_level: batteryLevel.toString(),
+        ble_rx_count: bleRxCount.toString(),
+        param_16: param16.toString(),
+        param_242: param242.toString()
+      })
     }
-  ]
-
-  const handleFilter = () => {
-    console.log('Filter clicked:', messageType)
+    return data
   }
+
+  const allData = generateTableData()
+  
+  // Filter data based on message type
+  const filteredData = messageType === 'All Message Type' 
+    ? allData 
+    : allData.filter(item => item.message_type === messageType)
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentData = filteredData.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filter changes
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [messageType])
 
   const handleDateFilter = () => {
     console.log('Date filter clicked:', startDate, endDate)
@@ -76,6 +67,38 @@ const DataTable = () => {
   const handleExport = () => {
     console.log('Export to Excel clicked')
     // Implement export functionality here
+  }
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
+  }
+
+  const renderPaginationButtons = () => {
+    const buttons = []
+    const maxVisiblePages = 5
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          onClick={() => goToPage(i)}
+          className={`px-3 py-2 rounded-md border transition-colors ${
+            currentPage === i ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          {i}
+        </button>
+      )
+    }
+
+    return buttons
   }
 
   return (
@@ -106,12 +129,6 @@ const DataTable = () => {
               <option>Parameter Report</option>
               <option>Registration</option>
             </select>
-            <button 
-              onClick={handleFilter}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
-            >
-              Filter
-            </button>
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
@@ -153,6 +170,16 @@ const DataTable = () => {
             </button>
           </div>
         </div>
+
+        {/* Data Summary */}
+        <div className="mt-4 text-sm text-gray-600">
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredData.length)} of {filteredData.length} entries
+          {messageType !== 'All Message Type' && (
+            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs">
+              Filtered by: {messageType}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -171,7 +198,7 @@ const DataTable = () => {
             </tr>
           </thead>
           <tbody>
-            {tableData.map((row, index) => (
+            {currentData.map((row, index) => (
               <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="p-4 text-sm text-gray-800">{row.no}</td>
                 <td className="p-4 text-sm text-gray-600">{row.message_type}</td>
@@ -189,51 +216,29 @@ const DataTable = () => {
 
       {/* Pagination */}
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center justify-end gap-2">
-          <button 
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            className="p-2 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => setCurrentPage(1)}
-            className={`px-3 py-2 rounded-md border transition-colors ${
-              currentPage === 1 ? 'bg-blue-600 text-white' : 'border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            1
-          </button>
-          <button 
-            onClick={() => setCurrentPage(3)}
-            className={`px-3 py-2 rounded-md border transition-colors ${
-              currentPage === 3 ? 'bg-blue-600 text-white' : 'border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            3
-          </button>
-          <button 
-            onClick={() => setCurrentPage(4)}
-            className={`px-3 py-2 rounded-md border transition-colors ${
-              currentPage === 4 ? 'bg-blue-600 text-white' : 'border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            4
-          </button>
-          <button 
-            onClick={() => setCurrentPage(5)}
-            className={`px-3 py-2 rounded-md border transition-colors ${
-              currentPage === 5 ? 'bg-blue-600 text-white' : 'border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            5
-          </button>
-          <button 
-            onClick={() => setCurrentPage(prev => prev + 1)}
-            className="p-2 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            
+            {renderPaginationButtons()}
+            
+            <button 
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
