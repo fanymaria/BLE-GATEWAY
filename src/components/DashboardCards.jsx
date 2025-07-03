@@ -13,8 +13,12 @@ const DashboardCards = () => {
       const batteryVoltage = (21.5 + Math.random() * 1.0).toFixed(1)
       const batteryLevel = Math.floor(85 + Math.random() * 15)
       const bleRxCount = Math.floor(1000 + Math.random() * 9000)
-      const param16 = messageTypeRandom === 'Parameter Report' ? Math.floor(50000 + Math.random() * 50000) : '-'
-      const param242 = Math.random() > 0.8 ? Math.floor(100 + Math.random() * 900) : '-'
+      const param16 = messageTypeRandom === 'Parameter Report'
+        ? Math.floor(50000 + Math.random() * 50000)
+        : '-'
+      const param242 = Math.random() > 0.8
+        ? Math.floor(100 + Math.random() * 900)
+        : '-'
 
       data.push({
         no: i,
@@ -36,30 +40,26 @@ const DashboardCards = () => {
   const heartbeatCount = allData.filter(item => item.message_type === 'Heartbeat').length
   const paramReportCount = allData.filter(item => item.message_type === 'Parameter Report').length
   const registrationCount = allData.filter(item => item.message_type === 'Registration').length
-  const totalMessages = allData.length
 
   const dashboardData = [
     { title: 'Heartbeat', value: heartbeatCount.toString(), icon: 'heart' },
-    { title: 'Param Report', value: paramReportCount.toString(), icon: 'report' },
-    { title: 'Registration', value: registrationCount.toString(), icon: 'registration' },
-    { title: 'Total Message', value: totalMessages.toString(), icon: 'message' }
+    { title: 'Parameter Report', value: paramReportCount.toString(), icon: 'report' },
+    { title: 'Registration', value: registrationCount.toString(), icon: 'registration' }
   ]
 
   const getIcon = (iconType) => {
     const iconMap = {
       'heart': '/asset/image/heartbeat.png',
-      'report': '/asset/image/param.png', 
-      'registration': '/asset/image/regis.png',
-      'message': '/asset/image/total.png'
+      'report': '/asset/image/param.png',
+      'registration': '/asset/image/regis.png'
     }
-    
+
     return (
       <img 
         src={iconMap[iconType]} 
         alt={iconType}
-        className="w-12 h-12 object-contain"
+        className="w-14 h-14 object-contain"
         onError={(e) => {
-          // Fallback if image fails to load
           e.target.style.display = 'none'
         }}
       />
@@ -67,17 +67,18 @@ const DashboardCards = () => {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-6 mb-8">
+    <div className="sticky top-28 w-64 h-fit p-0.5 flex flex-col gap-4 -ml-5">
       {dashboardData.map((item, index) => (
-        <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">{item.title}</p>
-              <p className="text-2xl font-semibold text-gray-800">{item.value}</p>
-            </div>
-            <div className="text-2xl opacity-70">
-              {getIcon(item.icon)}
-            </div>
+        <div
+          key={index}
+          className="bg-white rounded-lg px-6 py-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex items-center justify-between min-h-[120px]"
+        >
+          <div>
+            <p className="text-gray-600 text-base mb-2">{item.title}</p>
+            <p className="text-3xl font-bold text-gray-800">{item.value}</p>
+          </div>
+          <div className="text-2xl opacity-70">
+            {getIcon(item.icon)}
           </div>
         </div>
       ))}
